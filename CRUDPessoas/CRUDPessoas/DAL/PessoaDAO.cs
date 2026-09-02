@@ -6,8 +6,6 @@ using System.Text;
 
 namespace CRUDPessoas.DAL
 {
-	
-
     public class PessoaDAO
     {
         public String mensagem;
