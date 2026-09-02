@@ -104,5 +104,71 @@ namespace CRUDPessoas.DAL
                 Conexao.Desconectar();
             }
         }
+
+        public void ExcluirPessoa(Pessoa pessoa)
+        {
+            try
+            {
+                SqlConnection conexao = Conexao.Conectar();
+                string comandoSql = "DELETE FROM Pessoas WHERE id = @id";
+
+                using (SqlCommand comando = new SqlCommand(comandoSql, conexao))
+                {
+                    comando.Parameters.AddWithValue("@id", pessoa.id);
+
+                    comando.ExecuteNonQuery();
+                }
+
+                Conexao.mensagem = "Pessoa excluída com sucesso.";
+            }
+            catch (Exception ex)
+            {
+                Conexao.mensagem = "Erro ao excluir pessoa: " + ex.Message;
+            }
+            finally
+            {
+                Conexao.Desconectar();
+            }
+        }
+
+        public List<Pessoa> PesquisarPessoaPorNome(Pessoa pessoa)
+        {
+            List<Pessoa> listaPessoas = new List<Pessoa>();
+            try
+            {
+                SqlConnection conexao = Conexao.Conectar();
+                string comandoSql = "SELECT id, nome, rg, cpf FROM Pessoas WHERE nome LIKE @nome";
+
+                using (SqlCommand comando = new SqlCommand(comandoSql, conexao))
+                {
+                    comando.Parameters.AddWithValue("@nome", "%" + pessoa.nome + "%");
+
+                    using (SqlDataReader leitor = comando.ExecuteReader())
+                    {
+                        while (leitor.Read())
+                        {
+                            Pessoa p = new Pessoa();
+
+                            p.id = Convert.ToInt32(leitor["id"]);
+                            p.nome = leitor["nome"].ToString();
+                            p.rg = leitor["rg"].ToString();
+                            p.cpf = leitor["cpf"].ToString();
+                            
+                            listaPessoas.Add(p);
+                        }
+                    }
+                }
+                Conexao.mensagem = "Pesquisa realizada com sucesso.";
+            }
+            catch (Exception ex)
+            {
+                Conexao.mensagem = "Erro ao pesquisar pessoa: " + ex.Message;
+            }
+            finally
+            {
+                Conexao.Desconectar();
+            }
+            return listaPessoas;
+        }
     }
 }
