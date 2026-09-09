@@ -10,6 +10,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using CRUDPessoas.modelo;
+
 namespace CRUDPessoas.apresentacao
 {
     /// <summary>
@@ -20,6 +22,18 @@ namespace CRUDPessoas.apresentacao
         public frmCadastrar()
         {
             InitializeComponent();
+        }
+
+        private void btnCadastrar_Click(object sender, RoutedEventArgs e)
+        {
+            Controle controle = new Controle();
+            List<String> listaDadosPessoa = new List<string>();
+            listaDadosPessoa.Add("0");
+            listaDadosPessoa.Add(txbNome.Text);
+            listaDadosPessoa.Add(txbRg.Text);
+            listaDadosPessoa.Add(txbCpf.Text);
+            controle.CadastrarPessoa(listaDadosPessoa);
+            MessageBox.Show(controle.mensagem);
         }
     }
 }

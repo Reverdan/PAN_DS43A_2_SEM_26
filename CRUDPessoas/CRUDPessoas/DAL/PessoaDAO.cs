@@ -58,10 +58,15 @@ namespace CRUDPessoas.DAL
                             pessoa.nome = leitor["nome"].ToString();
                             pessoa.rg = leitor["rg"].ToString();
                             pessoa.cpf = leitor["cpf"].ToString();
+                            //Conexao.mensagem = "Pesquisa realizada com sucesso.";
+                        }
+                        else
+                        {
+                            Conexao.mensagem = "Não existe pessoa com este ID";
                         }
                     }
                 }
-                Conexao.mensagem = "Pesquisa realizada com sucesso.";
+                
             }
             catch (Exception ex)
             {
@@ -103,8 +108,47 @@ namespace CRUDPessoas.DAL
             }
         }
 
+        public int contarRegistros(int id)
+        {
+            int contagem = 0;
+            try
+            {
+                SqlConnection conexao = Conexao.Conectar();
+                string comandoSql = "select COUNT(*) as total FROM Pessoas WHERE id = @id";
+                using (SqlCommand comando = new SqlCommand(comandoSql, conexao))
+                {
+                    comando.Parameters.AddWithValue("@id", id);
+
+                    using (SqlDataReader leitor = comando.ExecuteReader())
+                    {
+                        if (leitor.Read())
+                        {
+                            contagem = Convert.ToInt32(leitor["total"]);
+                        }
+
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Conexao.mensagem = "Erro ao contar pessoa: " + ex.Message;
+            }
+            finally
+            {
+                Conexao.Desconectar();
+            }
+            return contagem;
+        }
+
         public void ExcluirPessoa(Pessoa pessoa)
         {
+            if (contarRegistros(pessoa.id) != 1)
+            {
+                Conexao.mensagem = "Não existe este ID.";
+                return;
+            }
+
             try
             {
                 SqlConnection conexao = Conexao.Conectar();
