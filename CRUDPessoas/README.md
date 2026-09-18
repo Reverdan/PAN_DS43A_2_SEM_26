@@ -1,118 +1,162 @@
 # CRUDPessoas
 
-## Visão geral
-Este projeto é uma aplicação **desktop WPF (.NET 10)** para cadastro e manutenção de pessoas em banco SQL Server, com operações de **CRUD**:
+## 1) Visão geral do projeto
+`CRUDPessoas` é uma aplicação desktop em **WPF (.NET 10)** para gerenciar pessoas em banco SQL Server com operações de CRUD:
+
 - **Create**: cadastrar pessoa
 - **Read**: pesquisar por ID e por nome
 - **Update**: editar pessoa
 - **Delete**: excluir pessoa
 
-A solução está organizada para separar interface, regras e acesso a dados.
+O projeto segue organização em **3 camadas**, usando o padrão **DAO** para o acesso ao banco.
 
 ---
 
-## Estrutura da pasta
-Dentro de `CRUDPessoas/CRUDPessoas`:
+## 2) Modelo de 3 camadas
 
-- `apresentacao/`
-  - `frmPrincipal.xaml`: janela inicial com menu de navegação.
-  - `frmCadastrar.xaml`: tela para cadastrar pessoa.
-  - `frmPEE.xaml`: tela para pesquisar, editar e excluir.
-- `modelo/`
-  - `Pessoa.cs`: entidade com `id`, `nome`, `rg`, `cpf`.
-  - `Validacao.cs`: validações de ID e campos.
-  - `Controle.cs`: camada intermediária entre tela e DAO.
-- `DAL/`
-  - `Conexao.cs`: conexão com SQL Server e mensagens globais de operação.
-  - `PessoaDAO.cs`: operações SQL (insert, select, update, delete).
-- `App.xaml`: inicializa a aplicação (`StartupUri` em `frmPrincipal.xaml`).
+### Camada 1: Apresentação (`apresentacao`)
+Responsável pela interface com o usuário (janelas, campos, botões e eventos).
+
+### Camada 2: Modelo/Controle (`modelo`)
+Responsável por validar dados, aplicar regras e coordenar as chamadas para persistência.
+
+### Camada 3: Acesso a dados (`DAL`)
+Responsável por abrir conexão com o banco e executar SQL (INSERT, SELECT, UPDATE, DELETE).
+
+Essa separação evita SQL direto na interface e facilita manutenção.
 
 ---
 
-## Fluxo da aplicação
-1. Usuário interage com a tela (camada `apresentacao`).
-2. A tela envia dados para `Controle`.
-3. `Controle` chama `Validacao`.
-4. Se os dados forem válidos, `Controle` cria um objeto `Pessoa` e chama `PessoaDAO`.
-5. `PessoaDAO` executa SQL usando `Conexao`.
-6. Mensagem de sucesso/erro retorna para a tela.
+## 3) Padrão DAO (Data Access Object)
+No projeto, o DAO é a classe `PessoaDAO`:
 
-Essa organização reduz acoplamento da interface com SQL direto.
+- Encapsula todo acesso à tabela `Pessoas`
+- Recebe e retorna objetos do domínio (`Pessoa`)
+- Executa comandos SQL parametrizados
 
----
+Benefícios no contexto deste projeto:
 
-## Funcionalidades implementadas
-- **Cadastro** (`frmCadastrar`):
-  - Coleta nome, RG e CPF.
-  - Usa `Controle.CadastrarPessoa`.
-- **Pesquisa por ID** (`frmPEE`):
-  - Usa `Controle.PesquisarPessoaPorId`.
-  - Preenche os campos ao encontrar registro.
-- **Edição** (`frmPEE`):
-  - Usa `Controle.EditarPessoa`.
-- **Exclusão** (`frmPEE`):
-  - Usa `Controle.ExcluirPessoa`.
-- **Pesquisa por nome**:
-  - Existe na camada de regra (`Controle.PesquisarPessoaPorNome`) e DAO (`PessoaDAO.PesquisarPessoaPorNome`).
-  - Observação: o evento `btnPesquisarNome_Click` está criado na tela, mas sem implementação no code-behind.
+- Organização: SQL fica centralizado
+- Menor acoplamento: UI não depende de detalhes de banco
+- Manutenção mais simples
+- Mais segurança contra SQL Injection (uso de parâmetros `@id`, `@nome`, etc.)
 
 ---
 
-## Regras de validação atuais
-Em `Validacao.cs`:
-- ID deve ser numérico.
-- Nome:
-  - obrigatório
-  - mínimo de 3 caracteres
-  - máximo de 50 caracteres
-- RG: máximo de 11 caracteres.
-- CPF: máximo de 13 caracteres.
+## 4) Estrutura de pastas e classes
+Dentro de `/home/runner/work/PAN_DS43A_2_SEM_26/PAN_DS43A_2_SEM_26/CRUDPessoas/CRUDPessoas`:
 
-As mensagens são agregadas e exibidas ao usuário.
+### `apresentacao/`
+- `frmPrincipal.xaml` e `frmPrincipal.xaml.cs` (`MainWindow`): tela inicial com menu.
+- `frmCadastrar.xaml` e `frmCadastrar.xaml.cs` (`frmCadastrar`): tela de cadastro.
+- `frmPEE.xaml` e `frmPEE.xaml.cs` (`frmPEE`): tela de pesquisar/editar/excluir.
 
----
+### `modelo/`
+- `Pessoa.cs`: entidade com `id`, `nome`, `rg`, `cpf`.
+- `Validacao.cs`: validação de ID e campos de pessoa.
+- `Controle.cs`: orquestra validação + operações de DAO.
 
-## Banco de dados
-O projeto usa tabela `Pessoas` no SQL Server com os campos:
-- `id` (int, identity, chave primária)
-- `nome` (varchar(50), obrigatório)
-- `rg` (varchar(11))
-- `cpf` (varchar(13))
+### `DAL/`
+- `Conexao.cs`: conecta/desconecta do SQL Server e mantém mensagem de retorno.
+- `PessoaDAO.cs`: operações de persistência da entidade `Pessoa`.
 
-O script base de criação está comentado em `DAL/Conexao.cs`.
-
-> Importante: ajuste a `stringConexao` em `Conexao.cs` para seu ambiente antes de executar.
+### Arquivos de inicialização
+- `App.xaml` / `App.xaml.cs`: configuração da aplicação WPF e `StartupUri` para `apresentacao/frmPrincipal.xaml`.
+- `CRUDPessoas.csproj`: projeto .NET WPF com `Microsoft.Data.SqlClient`.
 
 ---
 
-## Padrão DAO (Data Access Object) no projeto
-O padrão **DAO** separa as regras de negócio do acesso físico ao banco.
+## 5) Métodos implementados de todas as classes
 
-### Como ele aparece aqui
-- `PessoaDAO` é o DAO da entidade `Pessoa`.
-- Cada método do DAO representa uma operação de persistência:
-  - `CadastrarPessoa` → `INSERT`
-  - `PesquisarPessoaPorId` / `PesquisarPessoaPorNome` → `SELECT`
-  - `EditarPessoa` → `UPDATE`
-  - `ExcluirPessoa` → `DELETE`
-- `Conexao` centraliza abrir/fechar conexão.
+## `App` (`App.xaml.cs`)
+- Não possui métodos próprios implementados; herda o ciclo de vida de `Application`.
 
-### Papel de cada camada com DAO
-- **Apresentação**: só lida com campos e eventos.
-- **Controle/Validação**: aplica regras de entrada e monta objetos.
-- **DAO**: executa SQL parametrizado e devolve dados/resultados.
+## `MainWindow` (`apresentacao/frmPrincipal.xaml.cs`)
+- `MainWindow()`: inicializa a janela principal.
+- `mniCadastrar_Click(...)`: abre `frmCadastrar` em modo modal.
+- `mniPEE_Click(...)`: abre `frmPEE` em modo modal.
 
-### Benefícios práticos neste projeto
-- Facilita manutenção de SQL em um único ponto (`PessoaDAO`).
-- Melhora organização e leitura do código.
-- Permite evoluir regras de negócio sem misturar com comandos SQL.
-- Reduz risco de SQL Injection ao usar parâmetros (`@nome`, `@id`, etc.).
+## `frmCadastrar` (`apresentacao/frmCadastrar.xaml.cs`)
+- `frmCadastrar()`: inicializa a janela.
+- `btnCadastrar_Click(...)`: monta lista de dados da pessoa, chama `Controle.CadastrarPessoa` e exibe a mensagem ao usuário.
+
+## `frmPEE` (`apresentacao/frmPEE.xaml.cs`)
+- `frmPEE()`: inicializa a janela.
+- `btnPesquisarId_Click(...)`: busca pessoa por ID via `Controle.PesquisarPessoaPorId`; preenche os campos se encontrada.
+- `btnPesquisarNome_Click(...)`: método criado, atualmente sem implementação.
+- `btnEditar_Click(...)`: envia dados para `Controle.EditarPessoa` e mostra retorno.
+- `btnExcluir_Click(...)`: chama `Controle.ExcluirPessoa` e mostra retorno.
+
+## `Pessoa` (`modelo/Pessoa.cs`)
+- Classe de entidade (POCO) com propriedades:
+  - `id` (`int`)
+  - `nome` (`string`)
+  - `rg` (`string`)
+  - `cpf` (`string`)
+
+## `Validacao` (`modelo/Validacao.cs`)
+- Propriedades:
+  - `id` (`int`): ID convertido e validado
+  - `mensagem` (`string`): acumula erros de validação
+- `ValidarId(string numId)`: tenta converter texto para inteiro; em erro, registra mensagem.
+- `ValidarDadosPessoa(List<string> listaDadosPessoa)`: valida ID, obrigatoriedade/tamanho do nome e tamanho de RG/CPF.
+
+## `Controle` (`modelo/Controle.cs`)
+- Propriedade:
+  - `mensagem` (`string`): resposta da validação ou da camada DAO
+- `CadastrarPessoa(List<string> listaDadosPessoa)`: força ID `0`, valida dados, cria `Pessoa` e chama `PessoaDAO.CadastrarPessoa`.
+- `PesquisarPessoaPorId(string numId)`: valida ID, pesquisa por ID via DAO e retorna `Pessoa`.
+- `EditarPessoa(List<string> listaDadosPessoa)`: valida dados, cria `Pessoa` e chama `PessoaDAO.EditarPessoa`.
+- `ExcluirPessoa(string numId)`: valida ID e chama `PessoaDAO.ExcluirPessoa`.
+- `PesquisarPessoaPorNome(string nome)`: valida nome, chama `PessoaDAO.PesquisarPessoaPorNome` e retorna lista.
+
+## `Conexao` (`DAL/Conexao.cs`)
+- Campos/propriedades estáticas:
+  - `con`: objeto de conexão SQL compartilhado
+  - `mensagem`: texto global de retorno da camada DAL
+  - `stringConexao`: string de conexão com SQL Server
+- `Conectar()`: abre conexão (se fechada), retorna `SqlConnection` e registra erro em `mensagem` se necessário.
+- `Desconectar()`: fecha conexão (se aberta) e registra erro em `mensagem` se necessário.
+
+## `PessoaDAO` (`DAL/PessoaDAO.cs`)
+- Campo:
+  - `mensagem` (`string`) — declarado na classe
+- `CadastrarPessoa(Pessoa pessoa)`: executa `INSERT` na tabela `Pessoas`.
+- `PesquisarPessoaPorId(Pessoa pessoa)`: executa `SELECT` por ID e preenche objeto `Pessoa`.
+- `EditarPessoa(Pessoa pessoa)`: executa `UPDATE` por ID.
+- `contarRegistros(int id)`: conta registros com o ID informado (`COUNT(*)`).
+- `ExcluirPessoa(Pessoa pessoa)`: valida existência do ID (via `contarRegistros`) e executa `DELETE`.
+- `PesquisarPessoaPorNome(Pessoa pessoa)`: executa `SELECT` com `LIKE` no nome e retorna `List<Pessoa>`.
 
 ---
 
-## Como executar (resumo)
-1. Criar banco e tabela `Pessoas` no SQL Server.
-2. Ajustar a `stringConexao` em `DAL/Conexao.cs`.
-3. Abrir `CRUDPessoas.slnx` no Visual Studio.
-4. Restaurar pacotes e executar o projeto WPF.
+## 6) Fluxo de dados (fim a fim)
+Fluxo típico para cadastro, edição ou exclusão:
 
+1. Usuário preenche campos e clica em botão na camada **apresentação**.
+2. Evento da janela chama um método da classe **Controle**.
+3. `Controle` usa **Validacao** para validar entrada.
+4. Com dados válidos, `Controle` monta objeto **Pessoa**.
+5. `Controle` chama método correspondente em **PessoaDAO**.
+6. `PessoaDAO` obtém conexão por **Conexao.Conectar()**.
+7. `PessoaDAO` executa SQL parametrizado no SQL Server.
+8. `PessoaDAO` finaliza com **Conexao.Desconectar()** e define mensagem de retorno.
+9. `Controle` propaga essa mensagem para a tela.
+10. A tela mostra resultado ao usuário com `MessageBox`.
+
+---
+
+## 7) Banco de dados e pré-requisitos
+Tabela esperada no SQL Server:
+
+- `id` `int` identity, chave primária
+- `nome` `varchar(50)` obrigatório
+- `rg` `varchar(11)`
+- `cpf` `varchar(13)`
+
+O script base está comentado em `DAL/Conexao.cs`.
+
+Antes de executar:
+1. Ajuste `stringConexao` em `DAL/Conexao.cs`.
+2. Abra `CRUDPessoas.slnx` no Visual Studio.
+3. Restaure os pacotes e execute o projeto.
