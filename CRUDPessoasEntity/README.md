@@ -50,7 +50,7 @@ Isso não significa que SQL deixa de existir. O banco continua relacional, mas o
 
 ## 3) Pacotes usados no projeto
 
-No arquivo [`CRUDPessoas/CRUDPessoas.csproj`](./CRUDPessoas/CRUDPessoas.csproj), o projeto referencia:
+No arquivo `CRUDPessoas/CRUDPessoas.csproj`, o projeto referencia:
 
 - `Microsoft.EntityFrameworkCore`
 - `Microsoft.EntityFrameworkCore.SqlServer`
@@ -75,7 +75,7 @@ Fornece suporte às ferramentas de desenvolvimento, principalmente para:
 
 ## 4) A entidade do sistema
 
-No arquivo [`CRUDPessoas/modelo/Pessoa.cs`](./CRUDPessoas/modelo/Pessoa.cs), a classe `Pessoa` representa os dados do domínio:
+No arquivo `CRUDPessoas/modelo/Pessoa.cs`, a classe `Pessoa` representa os dados do domínio:
 
 - `id`
 - `nome`
@@ -95,7 +95,7 @@ Neste projeto:
 
 ## 5) O que é `DbContext`?
 
-O coração do Entity Framework é o **contexto**, que neste projeto está em [`CRUDPessoas/DAL/AppDbContext.cs`](./CRUDPessoas/DAL/AppDbContext.cs).
+O coração do Entity Framework é o **contexto**, que neste projeto está em `CRUDPessoas/DAL/AppDbContext.cs`.
 
 `AppDbContext` herda de `DbContext` e representa a sessão de trabalho com o banco.
 
@@ -141,7 +141,7 @@ Em outras palavras, é nesse ponto que o EF Core aprende **onde** salvar e busca
 
 ## 7) Como o cadastro usando EF funciona
 
-O melhor exemplo introdutório deste projeto está em [`CRUDPessoas/DAL/PessoaDAO.cs`](./CRUDPessoas/DAL/PessoaDAO.cs).
+O melhor exemplo introdutório deste projeto está em `CRUDPessoas/DAL/PessoaDAO.cs`.
 
 No método `CadastrarPessoa`, o fluxo com EF Core é:
 
@@ -164,8 +164,8 @@ As **migrations** são arquivos que registram a evolução da estrutura do banco
 
 Neste projeto, elas estão em:
 
-- [`CRUDPessoas/Migrations/20260915194045_inicial.cs`](./CRUDPessoas/Migrations/20260915194045_inicial.cs)
-- [`CRUDPessoas/Migrations/AppDbContextModelSnapshot.cs`](./CRUDPessoas/Migrations/AppDbContextModelSnapshot.cs)
+- `CRUDPessoas/Migrations/20260915194045_inicial.cs`
+- `CRUDPessoas/Migrations/AppDbContextModelSnapshot.cs`
 
 Pela migration inicial, é possível ver que o EF Core criou a tabela `Pessoas` com colunas compatíveis com a classe `Pessoa`, incluindo o campo `email`.
 
